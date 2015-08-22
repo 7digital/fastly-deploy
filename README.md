@@ -17,6 +17,10 @@ deploy.rb [options]
 ruby bin/deploy.rb -k d3cafb4dde4dbeef -s 123456789abcdef -v foo.vcl -p
 ```
 
+## Versioning
+
+The deployment process clones the current activated version, as opposed to the latest/highest numbered version.
+
 ## Deployment Verification
 
 After the new service version has been activated, an optional check can be made against the service URL to ensure that the new VCL has actually taken effect. In order to facilitate this, the VCL file must have the following `#DEPLOY` directives present so that additional logic can be injected before the upload:
