@@ -40,3 +40,7 @@ sub vcl_error {
 The directives inject code that cause the VCL to emit a synthetic response containing the newly activated service version number when a request is made against `/vcl_version`. After deployment, this URL is polled until the version number matches that of the new deployment.
 
 If the directives are not present, the additional verification check is skipped.
+
+## Testing
+
+Tests can be ran against a Fastly account by populating the `FASTLY_TEST_API_KEY` environment variable with a Fastly API key and running `rspec`. As part of the tests, services will be automatically created and deleted by the fixtures. Do not run the tests using an account shared with production services.
