@@ -2,7 +2,7 @@ require 'fastly'
 require 'net/http'
 require 'colorize'
 
-def deploy_vcl(api_key, service_id, vcl_path, purge_all)
+def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_file)
 
   login_opts = { :api_key => api_key }
   fastly = Fastly.new(login_opts)
@@ -21,14 +21,11 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all)
   new_version = active_version.clone
   puts "New Version: #{new_version.number}"
 
-  vcl_contents = File.read(vcl_path)
-  new_vcl_contents = inject_deploy_verify_code(vcl_contents, new_version.number)
-  deploy_vcl_inserted = new_vcl_contents != vcl_contents
+  deploy_vcl_inserted = upload_new_vcl new_version, vcl_path, main_vcl.name
 
-  puts "Uploading..."
-  new_vcl = new_version.vcl(main_vcl.name)
-  new_vcl.content = new_vcl_contents
-  new_vcl.save!
+  if include_file != nil 
+    upload_new_vcl new_version, include_file, "Include"
+  end  
 
   puts "Validating..."
   new_version.validate
@@ -66,6 +63,20 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all)
 
   puts "Deployment complete.".green
 end
+
+def upload_new_vcl(version, vcl_path, vcl_name)
+
+  vcl_contents = File.read(vcl_path)
+  new_vcl_contents = inject_deploy_verify_code(vcl_contents, version.number)
+  
+  puts "Uploading..."
+  new_vcl = version.vcl(vcl_name)
+  new_vcl.content = new_vcl_contents
+  new_vcl.save!
+
+  return new_vcl_contents != vcl_contents
+
+end 
 
 def inject_deploy_verify_code(vcl, version_num)
 
