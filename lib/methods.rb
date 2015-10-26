@@ -24,15 +24,10 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
   deploy_vcl_inserted = upload_new_vcl new_version, vcl_path, main_vcl.name
 
   if include_files != nil 
+      vcls_from_fastly = fastly.list_vcls(:service_id => service.id,
+                                          :version => active_version.number)
     include_files.each do | include_file |
-      if fastly.list_vcls(:service_id => service.id,
-                          :version => active_version.number)
-            .any?{|vcl| vcl.name == include_file[:name]}
-      upload_new_vcl new_version, include_file[:path], include_file[:name]
-      else
-        vcl_contents = File.read(include_file[:path])
-        new_version.upload_vcl include_file[:name], vcl_contents
-      end 
+      upload_include vcls_from_fastly, include_file, new_version
     end
   end  
 
@@ -69,12 +64,10 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
     puts "Purging all..."
     service.purge_all
   end
-
   puts "Deployment complete.".green
 end
 
 def upload_new_vcl(version, vcl_path, vcl_name)
-
   vcl_contents = File.read(vcl_path)
   new_vcl_contents = inject_deploy_verify_code(vcl_contents, version.number)
   
@@ -82,13 +75,19 @@ def upload_new_vcl(version, vcl_path, vcl_name)
   new_vcl = version.vcl(vcl_name)
   new_vcl.content = new_vcl_contents
   new_vcl.save!
-
   return new_vcl_contents != vcl_contents
-
 end 
 
-def inject_deploy_verify_code(vcl, version_num)
+def upload_include(vcls_from_fastly, include_file, version)
+  if vcls_from_fastly.any?{|vcl| vcl.name == include_file[:name]}
+      upload_new_vcl version, include_file[:path], include_file[:name]
+  else
+    vcl_contents = File.read(include_file[:path])
+    version.upload_vcl include_file[:name], vcl_contents
+  end 
+end
 
+def inject_deploy_verify_code(vcl, version_num)
   deploy_recv_vcl = <<-END
   # --------- DEPLOY VERIFY CHECK START ---------
   if (req.url == "/vcl_version") {
@@ -110,6 +109,5 @@ def inject_deploy_verify_code(vcl, version_num)
 
   vcl.gsub(/#DEPLOY recv/, deploy_recv_vcl)
     .gsub(/#DEPLOY error/, deploy_error_vcl)
-
 end
 
