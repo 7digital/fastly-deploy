@@ -33,6 +33,7 @@ RSpec.describe "fastly-deploy" do
     it "increments the version number exposed by /vcl_version" do
 
       deploy_vcl @api_key, @service.id, "spec/test.vcl", false
+      expect(Integer(get_active_version.number)).to be > Integer(@version.number)
 
     end
 
