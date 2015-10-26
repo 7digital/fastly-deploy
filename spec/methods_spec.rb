@@ -47,10 +47,10 @@ RSpec.describe "fastly-deploy" do
 
     it 'uploads include alongside main vcl' do
       version_with_include = @version.clone
-      upload_include_vcl_to_version version_with_include, "spec/test_include.vcl", "Include"
+      upload_include_vcl_to_version version_with_include, "spec/includes/test_include.vcl", "Include"
       version_with_include.activate!
 
-      new_include_to_upload = [{path:"spec/new_test_include.vcl", name:"Include"}]
+      new_include_to_upload = [{path:"spec/includes/new_test_include.vcl", name:"Include"}]
 
       deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_include_to_upload
 
@@ -62,14 +62,14 @@ RSpec.describe "fastly-deploy" do
     it 'uploads multiple includes alongside main vcl' do
       version_with_include = @version.clone
 
-      includes_to_upload = [ {path:"spec/test_include.vcl", name:"Include"}, {path:"spec/test_include_2.vcl", name:"Include2"}]
+      includes_to_upload = [ {path:"spec/includes/test_include.vcl", name:"Include"}, {path:"spec/includes/test_include_2.vcl", name:"Include2"}]
 
       includes_to_upload.each  do | include_vcl | 
         upload_include_vcl_to_version version_with_include, include_vcl[:path], include_vcl[:name]
       end 
       version_with_include.activate!
 
-      new_includes_to_upload = [ {path:"spec/new_test_include.vcl", name:"Include"}, {path:"spec/new_test_include_2.vcl", name:"Include2"}]
+      new_includes_to_upload = [ {path:"spec/includes/new_test_include.vcl", name:"Include"}, {path:"spec/includes/new_test_include_2.vcl", name:"Include2"}]
 
       deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_includes_to_upload
 
@@ -82,7 +82,7 @@ RSpec.describe "fastly-deploy" do
     end
 
     it 'uploads includes that have not been created before' do
-      new_include_to_upload = [{path:"spec/new_test_include.vcl", name:"Include"}]
+      new_include_to_upload = [{path:"spec/includes/new_test_include.vcl", name:"Include"}]
 
       deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_include_to_upload
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require_relative '../lib/methods'
 require 'optparse'
 
@@ -12,6 +14,13 @@ optparse = OptionParser.new do |opts|
   end
   opts.on("-v", "--vcl-path FILE", "VCL Path") do |vcl_path|
     options[:vcl_path] = vcl_path
+  end
+  opts.on("-i", "--vcl-includes INCLUDES_DIR", "Includes Directory") do |includes_dir|
+    options[:includes] = []
+    Dir.entries(includes_dir).select{|file| File.extname(file) == ".vcl" }.each do |file|
+      options[:includes].push({path:File.join(includes_dir, file), name:File.basename(file, ".vcl")})
+    end
+    puts options[:includes]
   end
   options[:purge_all] = false
   opts.on("-p", "--purge-all", "Purge All") do |purge_all|
@@ -34,5 +43,6 @@ end
 deploy_vcl options[:api_key],
   options[:service_id],
   options[:vcl_path],
-  options[:purge_all]
+  options[:purge_all],
+  options[:includes]
 
