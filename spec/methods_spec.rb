@@ -45,16 +45,40 @@ RSpec.describe "fastly-deploy" do
       expect(number_of_domains_for_version(new_active_version)).to eq(1)
     end
 
-    it 'uploads includes alongside main vcl' do
+    it 'uploads include alongside main vcl' do
       version_with_include = @version.clone
-      upload_include_vcl_to_version version_with_include, "spec/test_include.vcl"
+      upload_include_vcl_to_version version_with_include, "spec/test_include.vcl", "Include"
       version_with_include.activate!
 
-      deploy_vcl @api_key, @service.id, "spec/test.vcl", false, 'spec/new_test_include.vcl'
+      new_include_to_upload = [{path:"spec/new_test_include.vcl", name:"Include"}]
+
+      deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_include_to_upload
 
       active_version = get_active_version
       new_include_vcl = active_version.vcl("Include")
       expect(new_include_vcl.content).to match(/563/) 
+    end
+
+    it 'uploads multiple includes alongside main vcl' do
+      version_with_include = @version.clone
+
+      includes_to_upload = [ {path:"spec/test_include.vcl", name:"Include"}, {path:"spec/test_include_2.vcl", name:"Include2"}]
+
+      includes_to_upload.each  do | include_vcl | 
+        upload_include_vcl_to_version version_with_include, include_vcl[:path], include_vcl[:name]
+      end 
+      version_with_include.activate!
+
+      new_includes_to_upload = [ {path:"spec/new_test_include.vcl", name:"Include"}, {path:"spec/new_test_include_2.vcl", name:"Include2"}]
+
+      deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_includes_to_upload
+
+      active_version = get_active_version
+      new_include_vcl = active_version.vcl("Include")
+      expect(new_include_vcl.content).to match(/563/)
+
+      second_include_vcl = active_version.vcl("Include2")
+      expect(second_include_vcl.content).to match(/2965/)
     end
   end
 
@@ -74,9 +98,10 @@ def upload_vcl_to_version(version, file_path)
   version.vcl("Main").set_main!
 end 
 
-def upload_include_vcl_to_version(version, file_path)
+def upload_include_vcl_to_version(version, file_path, name)
+  puts file_path
   vcl_contents = File.read(file_path)
-  version.upload_vcl "Include", vcl_contents
+  version.upload_vcl name, vcl_contents
 end 
 
 def create_non_active_version_with_another_domain

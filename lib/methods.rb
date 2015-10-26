@@ -2,7 +2,7 @@ require 'fastly'
 require 'net/http'
 require 'colorize'
 
-def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_file)
+def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
 
   login_opts = { :api_key => api_key }
   fastly = Fastly.new(login_opts)
@@ -23,8 +23,10 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_file)
 
   deploy_vcl_inserted = upload_new_vcl new_version, vcl_path, main_vcl.name
 
-  if include_file != nil 
-    upload_new_vcl new_version, include_file, "Include"
+  if include_files != nil 
+    include_files.each do | include_file |
+      upload_new_vcl new_version, include_file[:path], include_file[:name]
+    end
   end  
 
   puts "Validating..."
