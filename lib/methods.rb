@@ -25,7 +25,14 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
 
   if include_files != nil 
     include_files.each do | include_file |
+      if fastly.list_vcls(:service_id => service.id,
+                          :version => active_version.number)
+            .any?{|vcl| vcl.name == include_file[:name]}
       upload_new_vcl new_version, include_file[:path], include_file[:name]
+      else
+        vcl_contents = File.read(include_file[:path])
+        new_version.upload_vcl include_file[:name], vcl_contents
+      end 
     end
   end  
 

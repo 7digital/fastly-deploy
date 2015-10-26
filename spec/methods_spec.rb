@@ -80,6 +80,16 @@ RSpec.describe "fastly-deploy" do
       second_include_vcl = active_version.vcl("Include2")
       expect(second_include_vcl.content).to match(/2965/)
     end
+
+    it 'uploads includes that have not been created before' do
+      new_include_to_upload = [{path:"spec/new_test_include.vcl", name:"Include"}]
+
+      deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_include_to_upload
+
+      active_version = get_active_version
+      new_include_vcl = active_version.vcl("Include")
+      expect(new_include_vcl.content).to match(/563/) 
+    end
   end
 
   after(:each) do
