@@ -90,6 +90,10 @@ RSpec.describe "fastly-deploy" do
       new_include_vcl = active_version.vcl("Include")
       expect(new_include_vcl.content).to match(/563/) 
     end
+
+    it 'errors if main file is invalid' do
+      expect{deploy_vcl @api_key, @service.id, "spec/error_test.vcl", false, nil}.to raise_error(/Message from VCC-compiler/)
+    end
   end
 
   after(:each) do

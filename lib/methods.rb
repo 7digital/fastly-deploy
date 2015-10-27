@@ -29,10 +29,11 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
     include_files.each do | include_file |
       upload_include vcls_from_fastly, include_file, new_version
     end
-  end  
+  end 
 
   puts "Validating..."
-  new_version.validate
+  
+  validate(new_version)
 
   puts "Activating..."
   new_version.activate!
@@ -109,5 +110,14 @@ def inject_deploy_verify_code(vcl, version_num)
 
   vcl.gsub(/#DEPLOY recv/, deploy_recv_vcl)
     .gsub(/#DEPLOY error/, deploy_error_vcl)
+end
+
+def validate(version)
+  path = version.class.get_path(version.service_id, version.number)
+  response = version.fetcher.client.get("#{path}/validate")
+  status = response["status"]
+  if status!= "ok"
+    raise response["msg"]
+  end
 end
 
