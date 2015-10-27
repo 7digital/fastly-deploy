@@ -20,81 +20,99 @@ RSpec.describe "fastly-deploy" do
                           name: "DeployTestBackend",
                           ipv4: "192.0.43.10",
                           port: 80)
-    upload_main_vcl_to_version(@version, 'spec/test.vcl')
-    @version.activate!
-
-    puts "Activated service. Running test."
+    
   end
 
-  context "deploying a new VCL version" do
-    it "increments the version number exposed by /vcl_version" do
+  context "main vcl exists in initial version" do
+    before(:each) do
+      upload_main_vcl_to_version(@version, 'spec/test.vcl')
+      @version.activate!
+
+      puts "Activated service. Running test."
+    end  
+
+    context "deploying a new VCL version" do
+      it "increments the version number exposed by /vcl_version" do
+        deploy_vcl @api_key, @service.id, "spec/test.vcl", false, nil
+        expect(Integer(get_active_version.number)).to be > Integer(@version.number)
+      end
+
+      it 'gets the active version not the latest version' do
+        non_active_version = create_non_active_version_with_another_domain
+
+        expect(number_of_domains_for_version(@version)).to eq(1)
+        expect(number_of_domains_for_version(non_active_version)).to eq(2)
+        
+        deploy_vcl @api_key, @service.id, "spec/test.vcl", false, nil
+
+        new_active_version = get_active_version()
+        expect(new_active_version.number).not_to eq(@version.number)
+        expect(number_of_domains_for_version(new_active_version)).to eq(1)
+      end
+
+      it 'uploads include alongside main vcl' do
+        version_with_include = @version.clone
+        upload_include_vcl_to_version version_with_include, "spec/includes/test_include.vcl", "Include"
+        version_with_include.activate!
+
+        new_include_to_upload = [{path:"spec/includes/new_test_include.vcl", name:"Include"}]
+
+        deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_include_to_upload
+
+        active_version = get_active_version
+        new_include_vcl = active_version.vcl("Include")
+        expect(new_include_vcl.content).to match(/563/) 
+      end
+
+      it 'uploads multiple includes alongside main vcl' do
+        version_with_include = @version.clone
+
+        includes_to_upload = [ {path:"spec/includes/test_include.vcl", name:"Include"}, {path:"spec/includes/test_include_2.vcl", name:"Include2"}]
+
+        includes_to_upload.each  do | include_vcl | 
+          upload_include_vcl_to_version version_with_include, include_vcl[:path], include_vcl[:name]
+        end 
+        version_with_include.activate!
+
+        new_includes_to_upload = [ {path:"spec/includes/new_test_include.vcl", name:"Include"}, {path:"spec/includes/new_test_include_2.vcl", name:"Include2"}]
+
+        deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_includes_to_upload
+
+        active_version = get_active_version
+        new_include_vcl = active_version.vcl("Include")
+        expect(new_include_vcl.content).to match(/563/)
+
+        second_include_vcl = active_version.vcl("Include2")
+        expect(second_include_vcl.content).to match(/2965/)
+      end
+
+      it 'uploads includes that have not been created before' do
+        new_include_to_upload = [{path:"spec/includes/new_test_include.vcl", name:"Include"}]
+
+        deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_include_to_upload
+
+        active_version = get_active_version
+        new_include_vcl = active_version.vcl("Include")
+        expect(new_include_vcl.content).to match(/563/) 
+      end
+
+      it 'errors if main file is invalid' do
+        expect{deploy_vcl @api_key, @service.id, "spec/error_test.vcl", false, nil}.to raise_error(/Message from VCC-compiler/)
+      end
+    end
+  end
+
+  context "main vcl does not exists in inital version" do
+    before(:each) do
+      @version.activate!
+      puts "Activated service. Running test."
+    end  
+
+    it "uploads an inital version of the main vcl" do
       deploy_vcl @api_key, @service.id, "spec/test.vcl", false, nil
       expect(Integer(get_active_version.number)).to be > Integer(@version.number)
     end
-
-    it 'gets the active version not the latest version' do
-      non_active_version = create_non_active_version_with_another_domain
-
-      expect(number_of_domains_for_version(@version)).to eq(1)
-      expect(number_of_domains_for_version(non_active_version)).to eq(2)
-      
-      deploy_vcl @api_key, @service.id, "spec/test.vcl", false, nil
-
-      new_active_version = get_active_version()
-      expect(new_active_version.number).not_to eq(@version.number)
-      expect(number_of_domains_for_version(new_active_version)).to eq(1)
-    end
-
-    it 'uploads include alongside main vcl' do
-      version_with_include = @version.clone
-      upload_include_vcl_to_version version_with_include, "spec/includes/test_include.vcl", "Include"
-      version_with_include.activate!
-
-      new_include_to_upload = [{path:"spec/includes/new_test_include.vcl", name:"Include"}]
-
-      deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_include_to_upload
-
-      active_version = get_active_version
-      new_include_vcl = active_version.vcl("Include")
-      expect(new_include_vcl.content).to match(/563/) 
-    end
-
-    it 'uploads multiple includes alongside main vcl' do
-      version_with_include = @version.clone
-
-      includes_to_upload = [ {path:"spec/includes/test_include.vcl", name:"Include"}, {path:"spec/includes/test_include_2.vcl", name:"Include2"}]
-
-      includes_to_upload.each  do | include_vcl | 
-        upload_include_vcl_to_version version_with_include, include_vcl[:path], include_vcl[:name]
-      end 
-      version_with_include.activate!
-
-      new_includes_to_upload = [ {path:"spec/includes/new_test_include.vcl", name:"Include"}, {path:"spec/includes/new_test_include_2.vcl", name:"Include2"}]
-
-      deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_includes_to_upload
-
-      active_version = get_active_version
-      new_include_vcl = active_version.vcl("Include")
-      expect(new_include_vcl.content).to match(/563/)
-
-      second_include_vcl = active_version.vcl("Include2")
-      expect(second_include_vcl.content).to match(/2965/)
-    end
-
-    it 'uploads includes that have not been created before' do
-      new_include_to_upload = [{path:"spec/includes/new_test_include.vcl", name:"Include"}]
-
-      deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_include_to_upload
-
-      active_version = get_active_version
-      new_include_vcl = active_version.vcl("Include")
-      expect(new_include_vcl.content).to match(/563/) 
-    end
-
-    it 'errors if main file is invalid' do
-      expect{deploy_vcl @api_key, @service.id, "spec/error_test.vcl", false, nil}.to raise_error(/Message from VCC-compiler/)
-    end
-  end
+  end  
 
   after(:each) do
     puts "Deleting test service..."
