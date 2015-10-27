@@ -20,7 +20,7 @@ RSpec.describe "fastly-deploy" do
                           name: "DeployTestBackend",
                           ipv4: "192.0.43.10",
                           port: 80)
-    upload_vcl_to_version(@version, 'spec/test.vcl')
+    upload_main_vcl_to_version(@version, 'spec/test.vcl')
     @version.activate!
 
     puts "Activated service. Running test."
@@ -106,14 +106,16 @@ RSpec.describe "fastly-deploy" do
   end
 end
 
-def upload_vcl_to_version(version, file_path) 
-  vcl_contents = File.read(file_path)
-  version.upload_vcl "Main", vcl_contents
+def upload_main_vcl_to_version(version, file_path)
+  upload_vcl_to_version(version, file_path, "Main")
   version.vcl("Main").set_main!
 end 
 
 def upload_include_vcl_to_version(version, file_path, name)
-  puts file_path
+  upload_vcl_to_version(version, file_path, name)
+end  
+
+def upload_vcl_to_version(version, file_path, name)
   vcl_contents = File.read(file_path)
   version.upload_vcl name, vcl_contents
 end 
