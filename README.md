@@ -1,5 +1,5 @@
 # fastly-deploy
-A tool to assist in the deployment of updated VCL to Fastly. Provides additional verification that the new VCL has taken effect.
+A tool to assist in the deployment of updated VCL to Fastly. Provides additional verification that the new VCL has taken effects.
 
 ## Usage
 ```
@@ -7,14 +7,17 @@ deploy.rb [options]
     -k, --api-key API_KEY            Fastly API Key
     -s, --service-id SERVICE_ID      Service ID
     -v, --vcl-path FILE              VCL Path
+    -i, --vcl-includes INCLUDES_DIR  Includes Directory
     -p, --purge-all                  Purge All
     -h, --help                       Display this screen
 ```
 
 ## Example
 
+To deploy a new main VCL (foo.vcl) with includes contained in the 'includes' directory:
+
 ```
-ruby bin/deploy.rb -k d3cafb4dde4dbeef -s 123456789abcdef -v foo.vcl -p
+ruby bin/deploy.rb -k d3cafb4dde4dbeef -s 123456789abcdef -v foo.vcl -i includes -p
 ```
 
 ## Versioning
@@ -43,4 +46,4 @@ If the directives are not present, the additional verification check is skipped.
 
 ## Testing
 
-Tests can be ran against a Fastly account by populating the `FASTLY_TEST_API_KEY` environment variable with a Fastly API key and running `rspec`. As part of the tests, services will be automatically created and deleted by the fixtures. Do not run the tests using an account shared with production services.
+Tests can be run against a Fastly account by populating the `FASTLY_TEST_API_KEY` environment variable with a Fastly API key and running `rspec`. As part of the tests, services will be automatically created and deleted by the fixtures. Do not run the tests using an account shared with production services.
