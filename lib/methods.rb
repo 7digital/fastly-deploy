@@ -78,7 +78,7 @@ def upload_new_version_of_vcl(version, vcl_path, vcl_name)
   vcl_contents_from_file = File.read(vcl_path)
   vcl_contents_with_deploy_injection = inject_deploy_verify_code(vcl_contents_from_file, version.number)
   
-  puts "Uploading..."
+  puts "Uploading #{vcl_name}"
   new_vcl = version.vcl(vcl_name)
   new_vcl.content = vcl_contents_with_deploy_injection
   new_vcl.save!
