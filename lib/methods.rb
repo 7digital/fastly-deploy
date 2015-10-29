@@ -48,7 +48,7 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
     attempts = 1
     deployed_vcl_version_number = 0
 
-    while attempts < 20 && deployed_vcl_version_number != new_version.number.to_s do
+    while attempts < 40 && deployed_vcl_version_number != new_version.number.to_s do
       sleep 2
       url = URI.parse("http://#{domain.name}.global.prod.fastly.net/vcl_version")
       req = Net::HTTP::Get.new(url.to_s)
