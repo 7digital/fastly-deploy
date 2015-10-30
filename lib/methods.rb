@@ -29,10 +29,13 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
   end  
 
   if include_files != nil 
-      vcls_from_fastly = fastly.list_vcls(:service_id => service.id,
-                                          :version => active_version.number)
+    vcls_from_fastly = fastly.list_vcls(:service_id => service.id,
+                                          :version => new_version.number)
+
+    vcls_from_fastly.each { |vcl| vcl.delete! unless vcl.main}
+
     include_files.each do | include_file |
-      upload_include vcls_from_fastly, include_file, new_version
+      upload_new_vcl new_version, include_file[:path], include_file[:name] 
     end
   end 
 
@@ -90,14 +93,6 @@ def upload_new_vcl(version, vcl_path, name)
   vcl_contents_with_deploy_injection = inject_deploy_verify_code(vcl_contents_from_file, version.number)
   version.upload_vcl name, vcl_contents_with_deploy_injection
 end  
-
-def upload_include(vcls_from_fastly, include_file, version)
-  if vcls_from_fastly.any?{|vcl| vcl.name == include_file[:name]}
-    upload_new_version_of_vcl version, include_file[:path], include_file[:name]
-  else
-    upload_new_vcl version, include_file[:path], include_file[:name]
-  end 
-end
 
 def inject_deploy_verify_code(vcl, version_num)
   deploy_recv_vcl = <<-END

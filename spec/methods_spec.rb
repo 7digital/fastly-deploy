@@ -64,26 +64,35 @@ RSpec.describe "fastly-deploy" do
         expect(new_include_vcl.content).to match(/563/) 
       end
 
-      it 'uploads multiple includes alongside main vcl' do
+      it 'uploads multiple includes alongside main vcl and removes unused includes' do
         version_with_include = @version.clone
 
-        includes_to_upload = [ {path:"spec/includes/test_include.vcl", name:"Include"}, {path:"spec/includes/test_include_2.vcl", name:"Include2"}]
+        includes_to_upload = [ {path:"spec/includes/test_include.vcl", name:"Include"},
+                               {path:"spec/includes/test_include_2.vcl", name:"Include2"},
+                               {path:"spec/includes/not_uploaded_again_include.vcl", name:"NotUsed"}]
 
         includes_to_upload.each  do | include_vcl | 
           upload_include_vcl_to_version version_with_include, include_vcl[:path], include_vcl[:name]
         end 
         version_with_include.activate!
+        expect_vcl_to_contain(version_with_include, "NotUsed", /111/)
 
         new_includes_to_upload = [ {path:"spec/includes/new_test_include.vcl", name:"Include"}, {path:"spec/includes/new_test_include_2.vcl", name:"Include2"}]
 
         deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_includes_to_upload
 
         active_version = get_active_version
-        new_include_vcl = active_version.vcl("Include")
-        expect(new_include_vcl.content).to match(/563/)
+        expect_vcl_to_contain(active_version, "Include", /563/)
+        expect_vcl_to_contain(active_version, "Include2", /2965/)
 
-        second_include_vcl = active_version.vcl("Include2")
-        expect(second_include_vcl.content).to match(/2965/)
+        begin
+          active_version.vcl("NotUsed")
+          fail "Should have thrown exception about non existent vcl" 
+        rescue Fastly::Error => fastlyError
+          expect(JSON.parse(fastlyError.message)["detail"]).to match(/Couldn't find/)
+        end
+
+        
       end
 
       it 'uploads includes that have not been created before' do
@@ -155,5 +164,10 @@ def get_active_version
   service = @fastly.get_service(@service.id)
   active_version = service.versions.find{|ver| ver.active?}
   return active_version
+end  
+
+def expect_vcl_to_contain(version, name, regex)
+  vcl = version.vcl(name)
+  expect(vcl.content).to match(regex)
 end  
 
