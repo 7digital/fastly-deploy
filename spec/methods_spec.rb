@@ -113,7 +113,7 @@ RSpec.describe "fastly-deploy" do
         deploy_vcl @api_key, @service.id, "spec/test_service_id_injection.vcl", false, nil
         
         active_version = get_active_version
-        expect_vcl_to_contain active_version, "Main", /#{@service.id}/
+        expect_vcl_to_contain active_version, "Main", /set obj.response = "#{@service.id}"/
         expect_vcl_not_to_contain active_version, "Main", /#FASTLY_SERVICE_ID/
       end
     end
