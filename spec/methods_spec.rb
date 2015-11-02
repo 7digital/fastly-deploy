@@ -108,6 +108,14 @@ RSpec.describe "fastly-deploy" do
       it 'errors if main file is invalid' do
         expect{deploy_vcl @api_key, @service.id, "spec/error_test.vcl", false, nil}.to raise_error(/Message from VCC-compiler/)
       end
+
+      it "qualifies the service name in the vcls" do
+        deploy_vcl @api_key, @service.id, "spec/test_service_id_injection.vcl", false, nil
+        
+        active_version = get_active_version
+        expect_vcl_to_contain active_version, "Main", /#{@service.id}/
+        expect_vcl_not_to_contain active_version, "Main", /#FASTLY_SERVICE_ID/
+      end
     end
   end
 
@@ -170,4 +178,9 @@ def expect_vcl_to_contain(version, name, regex)
   vcl = version.vcl(name)
   expect(vcl.content).to match(regex)
 end  
+
+def expect_vcl_not_to_contain(version, name, regex)
+  vcl = version.vcl(name)
+  expect(vcl.content).not_to match(regex)
+end 
 
