@@ -109,7 +109,7 @@ RSpec.describe "fastly-deploy" do
         expect{deploy_vcl @api_key, @service.id, "spec/error_test.vcl", false, nil}.to raise_error(/Message from VCC-compiler/)
       end
 
-      it "qualifies the service name in the vcls" do
+      it "injects the service id in the vcls" do
         deploy_vcl @api_key, @service.id, "spec/test_service_id_injection.vcl", false, nil
         
         active_version = get_active_version
@@ -128,6 +128,11 @@ RSpec.describe "fastly-deploy" do
     it "uploads an inital version of the main vcl" do
       deploy_vcl @api_key, @service.id, "spec/test.vcl", false, nil
       expect(Integer(get_active_version.number)).to be > Integer(@version.number)
+      active_version = get_active_version
+      main_vcl = @fastly.list_vcls(:service_id => @service.id, 
+                                  :version => active_version.number)
+                              .find{|vcl| vcl.main}
+      expect(main_vcl).not_to be_nil
     end
   end  
 
