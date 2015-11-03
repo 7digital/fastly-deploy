@@ -25,7 +25,7 @@ RSpec.describe "fastly-deploy" do
 
   context "main vcl exists in initial version" do
     before(:each) do
-      upload_main_vcl_to_version(@version, 'spec/test.vcl')
+      upload_main_vcl_to_version(@version, 'spec/vcls/test_no_wait.vcl')
       @version.activate!
 
       puts "Activated service. Running test."
@@ -33,7 +33,7 @@ RSpec.describe "fastly-deploy" do
 
     context "deploying a new VCL version" do
       it "increments the version number exposed by /vcl_version" do
-        deploy_vcl @api_key, @service.id, "spec/test.vcl", false, nil
+        deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, nil
         expect(Integer(get_active_version.number)).to be > Integer(@version.number)
       end
 
@@ -43,7 +43,7 @@ RSpec.describe "fastly-deploy" do
         expect(number_of_domains_for_version(@version)).to eq(1)
         expect(number_of_domains_for_version(non_active_version)).to eq(2)
         
-        deploy_vcl @api_key, @service.id, "spec/test.vcl", false, nil
+        deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, nil
 
         new_active_version = get_active_version()
         expect(new_active_version.number).not_to eq(@version.number)
@@ -57,7 +57,7 @@ RSpec.describe "fastly-deploy" do
 
         new_include_to_upload = [{path:"spec/includes/new_test_include.vcl", name:"Include"}]
 
-        deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_include_to_upload
+        deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, new_include_to_upload
 
         active_version = get_active_version
         new_include_vcl = active_version.vcl("Include")
@@ -79,7 +79,7 @@ RSpec.describe "fastly-deploy" do
 
         new_includes_to_upload = [ {path:"spec/includes/new_test_include.vcl", name:"Include"}, {path:"spec/includes/new_test_include_2.vcl", name:"Include2"}]
 
-        deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_includes_to_upload
+        deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, new_includes_to_upload
 
         active_version = get_active_version
         expect_vcl_to_contain(active_version, "Include", /563/)
@@ -98,7 +98,7 @@ RSpec.describe "fastly-deploy" do
       it 'uploads includes that have not been created before' do
         new_include_to_upload = [{path:"spec/includes/new_test_include.vcl", name:"Include"}]
 
-        deploy_vcl @api_key, @service.id, "spec/test.vcl", false, new_include_to_upload
+        deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, new_include_to_upload
 
         active_version = get_active_version
         new_include_vcl = active_version.vcl("Include")
@@ -106,15 +106,20 @@ RSpec.describe "fastly-deploy" do
       end
 
       it 'errors if main file is invalid' do
-        expect{deploy_vcl @api_key, @service.id, "spec/error_test.vcl", false, nil}.to raise_error(/Message from VCC-compiler/)
+        expect{deploy_vcl @api_key, @service.id, "spec/vcls/error_test.vcl", false, nil}.to raise_error(/Message from VCC-compiler/)
       end
 
       it "injects the service id in the vcls" do
-        deploy_vcl @api_key, @service.id, "spec/test_service_id_injection.vcl", false, nil
+        deploy_vcl @api_key, @service.id, "spec/vcls/service_id_injection.vcl", false, nil
         
         active_version = get_active_version
         expect_vcl_to_contain active_version, "Main", /set obj.response = "#{@service.id}"/
         expect_vcl_not_to_contain active_version, "Main", /#FASTLY_SERVICE_ID/
+      end
+
+      it "injects deployment confirmation and waits for confirmation" do
+        expect {deploy_vcl @api_key, @service.id, "spec/vcls/wait_for_deployment_confirmation.vcl", false, nil}.to output(/Waiting for changes to take effect/).to_stdout
+        
       end
     end
   end
@@ -126,7 +131,7 @@ RSpec.describe "fastly-deploy" do
     end  
 
     it "uploads an inital version of the main vcl" do
-      deploy_vcl @api_key, @service.id, "spec/test.vcl", false, nil
+      deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, nil
       expect(Integer(get_active_version.number)).to be > Integer(@version.number)
       active_version = get_active_version
       main_vcl = @fastly.list_vcls(:service_id => @service.id, 
