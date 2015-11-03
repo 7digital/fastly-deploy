@@ -111,11 +111,15 @@ RSpec.describe "fastly-deploy" do
       end
 
       it "injects the service id in the vcls" do
-        deploy_vcl @api_key, @service.id, "spec/vcls/service_id_injection.vcl", false, nil
+        include_to_upload = [{path:"spec/vcls/includes/service_id_injection_include.vcl", name:"Include"}]
+        deploy_vcl @api_key, @service.id, "spec/vcls/service_id_injection.vcl", false, include_to_upload
         
         active_version = get_active_version
         expect_vcl_to_contain active_version, "Main", /set obj.response = "#{@service.id}"/
         expect_vcl_not_to_contain active_version, "Main", /#FASTLY_SERVICE_ID/
+
+        expect_vcl_to_contain active_version, "Include", /set obj.response = "#{@service.id}"/
+        expect_vcl_not_to_contain active_version, "Include", /#FASTLY_SERVICE_ID/
       end
 
       it "injects deployment confirmation and waits for confirmation" do
