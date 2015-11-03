@@ -50,6 +50,12 @@ RSpec.describe "fastly-deploy" do
         expect(number_of_domains_for_version(new_active_version)).to eq(1)
       end
 
+      it 'sets the name of the main vcl to the name of the file' do
+        deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, nil
+        active_version = get_active_version
+        expect_vcl_to_contain(active_version, "test_no_wait", /400/)
+      end  
+
       it 'uploads include alongside main vcl' do
         version_with_include = @version.clone
         upload_include_vcl_to_version version_with_include, "spec/vcls/includes/test_include.vcl", "Include"
@@ -115,8 +121,8 @@ RSpec.describe "fastly-deploy" do
         deploy_vcl @api_key, @service.id, "spec/vcls/service_id_injection.vcl", false, include_to_upload
         
         active_version = get_active_version
-        expect_vcl_to_contain active_version, "Main", /set obj.response = "#{@service.id}"/
-        expect_vcl_not_to_contain active_version, "Main", /#FASTLY_SERVICE_ID/
+        expect_vcl_to_contain active_version, "service_id_injection", /set obj.response = "#{@service.id}"/
+        expect_vcl_not_to_contain active_version, "service_id_injection", /#FASTLY_SERVICE_ID/
 
         expect_vcl_to_contain active_version, "Include", /set obj.response = "#{@service.id}"/
         expect_vcl_not_to_contain active_version, "Include", /#FASTLY_SERVICE_ID/

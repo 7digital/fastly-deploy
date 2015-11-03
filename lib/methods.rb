@@ -68,7 +68,7 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
 end
 
 def upload_main_vcl(version, vcl_path, service_id)
-  vcl_name = "Main"
+  vcl_name = File.basename(vcl_path, ".vcl")
   can_verify_deployment = upload_vcl version, vcl_path, vcl_name, service_id
   version.vcl(vcl_name).set_main!
   return can_verify_deployment
