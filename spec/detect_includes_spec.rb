@@ -45,4 +45,11 @@ RSpec.describe "get_includes" do
     expect(includes).to include("spec/vcls/includes/level_four_include.vcl")
     expect(includes).to include("spec/vcls/includes/test_include.vcl")
   end
+
+  it "prevent infinite loops" do
+    includes = get_includes("spec/vcls/detect_includes_vcls/include_with_infinite_loop.vcl", "spec/vcls/includes")
+    expect(includes.length).to eq(2)
+    expect(includes).to include("spec/vcls/includes/one_include_with_infinite_loop.vcl")
+    expect(includes).to include("spec/vcls/includes/two_include_with_infinite_loop.vcl")
+  end
 end  
