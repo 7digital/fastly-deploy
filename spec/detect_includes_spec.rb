@@ -27,4 +27,12 @@ RSpec.describe "get_includes" do
     expect(includes).to include("spec/vcls/includes/has_include.vcl")
     expect(includes).to include("spec/vcls/includes/test_include.vcl")
   end
+
+  it "should only list each include once" do
+    includes = get_includes("spec/vcls/detect_includes_vcls/two_includes_with_same_include.vcl", "spec/vcls/includes")
+    expect(includes.length).to eq(3)
+    expect(includes).to include("spec/vcls/includes/has_include.vcl")
+    expect(includes).to include("spec/vcls/includes/has_same_include.vcl")
+    expect(includes).to include("spec/vcls/includes/test_include.vcl")
+  end
 end  

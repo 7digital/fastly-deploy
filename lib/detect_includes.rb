@@ -1,6 +1,7 @@
 def get_includes(main_vcl_path, includes_dir)
   main_includes = get_includes_for_vcl main_vcl_path, includes_dir
-  return main_includes.concat main_includes.map{| include_vcl | get_includes_for_vcl include_vcl, includes_dir}.flatten
+  include_includes = main_includes.map{| include_vcl | get_includes_for_vcl include_vcl, includes_dir}.flatten
+  return (main_includes.concat include_includes).uniq
 end
 
 def get_includes_for_vcl(vcl_path, includes_dir) 
