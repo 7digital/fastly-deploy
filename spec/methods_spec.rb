@@ -1,5 +1,6 @@
 require 'rspec'
 require_relative '../lib/methods.rb'
+require_relative 'spec_helpers.rb'
 require 'fastly'
 
 RSpec.describe "fastly-deploy" do
@@ -58,39 +59,38 @@ RSpec.describe "fastly-deploy" do
 
       it 'uploads include alongside main vcl' do
         version_with_include = @version.clone
-        upload_include_vcl_to_version version_with_include, "spec/vcls/includes/test_include.vcl", "Include"
+        upload_include_vcl_to_version version_with_include, "spec/vcls/includes/test_include.vcl", "new_test_include"
         version_with_include.activate!
 
-        new_include_to_upload = [{path:"spec/vcls/includes/new_test_include.vcl", name:"Include"}]
+        new_include_to_upload = [{path:"spec/vcls/includes/new_test_include.vcl"}]
 
         deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, new_include_to_upload
 
         active_version = get_active_version
-        new_include_vcl = active_version.vcl("Include")
-        expect(new_include_vcl.content).to match(/563/) 
+        expect_vcl_to_contain active_version, "new_test_include", /563/
       end
 
       it 'uploads multiple includes alongside main vcl and removes unused includes' do
         version_with_include = @version.clone
 
-        includes_to_upload = [ {path:"spec/vcls/includes/test_include.vcl", name:"Include"},
-                               {path:"spec/vcls/includes/test_include_2.vcl", name:"Include2"},
-                               {path:"spec/vcls/includes/not_uploaded_again_include.vcl", name:"NotUsed"}]
+        includes_to_upload_original = [ {path:"spec/vcls/includes/test_include.vcl", name:"new_test_include"},
+                                        {path:"spec/vcls/includes/test_include_2.vcl", name:"new_test_include_2"},
+                                        {path:"spec/vcls/includes/not_uploaded_again_include.vcl", name:"NotUsed"}]
 
-        includes_to_upload.each  do | include_vcl | 
+        includes_to_upload_original.each  do | include_vcl | 
           upload_include_vcl_to_version version_with_include, include_vcl[:path], include_vcl[:name]
         end 
         version_with_include.activate!
         expect_vcl_to_contain(version_with_include, "NotUsed", /111/)
 
-        new_includes_to_upload = [ {path:"spec/vcls/includes/new_test_include.vcl", name:"Include"}, 
-                                   {path:"spec/vcls/includes/new_test_include_2.vcl", name:"Include2"}]
+        new_includes_to_upload = [ {path:"spec/vcls/includes/new_test_include.vcl"}, 
+                                   {path:"spec/vcls/includes/new_test_include_2.vcl"}]
 
         deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, new_includes_to_upload
 
         active_version = get_active_version
-        expect_vcl_to_contain(active_version, "Include", /563/)
-        expect_vcl_to_contain(active_version, "Include2", /2965/)
+        expect_vcl_to_contain(active_version, "new_test_include", /563/)
+        expect_vcl_to_contain(active_version, "new_test_include_2", /2965/)
 
         begin
           active_version.vcl("NotUsed")
@@ -103,12 +103,12 @@ RSpec.describe "fastly-deploy" do
       end
 
       it 'uploads includes that have not been created before' do
-        new_include_to_upload = [{path:"spec/vcls/includes/new_test_include.vcl", name:"Include"}]
+        new_include_to_upload = [{path:"spec/vcls/includes/new_test_include.vcl"}]
 
         deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, new_include_to_upload
 
         active_version = get_active_version
-        new_include_vcl = active_version.vcl("Include")
+        new_include_vcl = active_version.vcl("new_test_include")
         expect(new_include_vcl.content).to match(/563/) 
       end
 
@@ -117,15 +117,15 @@ RSpec.describe "fastly-deploy" do
       end
 
       it "injects the service id in the vcls" do
-        include_to_upload = [{path:"spec/vcls/includes/service_id_injection_include.vcl", name:"Include"}]
+        include_to_upload = [{path:"spec/vcls/includes/service_id_injection_include.vcl"}]
         deploy_vcl @api_key, @service.id, "spec/vcls/service_id_injection.vcl", false, include_to_upload
         
         active_version = get_active_version
         expect_vcl_to_contain active_version, "service_id_injection", /set obj.response = "#{@service.id}"/
         expect_vcl_not_to_contain active_version, "service_id_injection", /#FASTLY_SERVICE_ID/
 
-        expect_vcl_to_contain active_version, "Include", /set obj.response = "#{@service.id}"/
-        expect_vcl_not_to_contain active_version, "Include", /#FASTLY_SERVICE_ID/
+        expect_vcl_to_contain active_version, "service_id_injection_include", /set obj.response = "#{@service.id}"/
+        expect_vcl_not_to_contain active_version, "service_id_injection_include", /#FASTLY_SERVICE_ID/
       end
 
       it "injects deployment confirmation and waits for confirmation" do
@@ -162,19 +162,9 @@ RSpec.describe "fastly-deploy" do
   end
 end
 
-def upload_main_vcl_to_version(version, file_path)
-  upload_vcl_to_version(version, file_path, "Main")
-  version.vcl("Main").set_main!
-end 
-
 def upload_include_vcl_to_version(version, file_path, name)
   upload_vcl_to_version(version, file_path, name)
 end  
-
-def upload_vcl_to_version(version, file_path, name)
-  vcl_contents = File.read(file_path)
-  version.upload_vcl name, vcl_contents
-end 
 
 def create_non_active_version_with_another_domain
   non_active_version = @version.clone
@@ -188,17 +178,6 @@ end
 def number_of_domains_for_version(version)
   return @fastly.list_domains(service_id: @service.id, version: version.number).length
 end
-
-def get_active_version
-  service = @fastly.get_service(@service.id)
-  active_version = service.versions.find{|ver| ver.active?}
-  return active_version
-end  
-
-def expect_vcl_to_contain(version, name, regex)
-  vcl = version.vcl(name)
-  expect(vcl.content).to match(regex)
-end  
 
 def expect_vcl_not_to_contain(version, name, regex)
   vcl = version.vcl(name)

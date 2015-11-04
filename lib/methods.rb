@@ -25,7 +25,7 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
 
   if include_files != nil 
     include_files.each do | include_file |
-      upload_vcl new_version, include_file[:path], include_file[:name], service_id 
+      upload_include_vcl new_version, include_file[:path], service_id 
     end
   end 
 
@@ -72,6 +72,11 @@ def upload_main_vcl(version, vcl_path, service_id)
   can_verify_deployment = upload_vcl version, vcl_path, vcl_name, service_id
   version.vcl(vcl_name).set_main!
   return can_verify_deployment
+end
+
+def upload_include_vcl(version, vcl_path, service_id)
+  vcl_name = File.basename(vcl_path, ".vcl")
+  upload_vcl version, vcl_path, vcl_name, service_id
 end
 
 def upload_vcl(version, vcl_path, name, service_id)
