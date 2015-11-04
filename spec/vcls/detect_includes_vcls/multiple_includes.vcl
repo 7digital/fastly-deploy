@@ -6,7 +6,7 @@ sub vcl_recv {
   error 900;
 }
 
-include "test_include"
+include "test_include";
 
 sub vcl_error {
 #FASTLY error
