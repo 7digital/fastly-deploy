@@ -25,7 +25,7 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
 
   if include_files != nil 
     include_files.each do | include_file |
-      upload_include_vcl new_version, include_file[:path], service_id 
+      upload_include_vcl new_version, include_file, service_id 
     end
   end 
 

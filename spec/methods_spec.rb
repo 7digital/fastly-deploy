@@ -47,7 +47,7 @@ RSpec.describe "fastly-deploy" do
         upload_include_vcl_to_version version_with_include, "spec/vcls/includes/test_include.vcl", "new_test_include"
         version_with_include.activate!
 
-        new_include_to_upload = [{path:"spec/vcls/includes/new_test_include.vcl"}]
+        new_include_to_upload = ["spec/vcls/includes/new_test_include.vcl"]
 
         deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, new_include_to_upload
 
@@ -68,8 +68,8 @@ RSpec.describe "fastly-deploy" do
         version_with_include.activate!
         expect_vcl_to_contain(version_with_include, "NotUsed", /111/)
 
-        new_includes_to_upload = [ {path:"spec/vcls/includes/new_test_include.vcl"}, 
-                                   {path:"spec/vcls/includes/new_test_include_2.vcl"}]
+        new_includes_to_upload = ["spec/vcls/includes/new_test_include.vcl",
+                                  "spec/vcls/includes/new_test_include_2.vcl"]
 
         deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, new_includes_to_upload
 
@@ -88,7 +88,7 @@ RSpec.describe "fastly-deploy" do
       end
 
       it 'uploads includes that have not been created before' do
-        new_include_to_upload = [{path:"spec/vcls/includes/new_test_include.vcl"}]
+        new_include_to_upload = ["spec/vcls/includes/new_test_include.vcl"]
 
         deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, new_include_to_upload
 
@@ -102,7 +102,7 @@ RSpec.describe "fastly-deploy" do
       end
 
       it "injects the service id in the vcls" do
-        include_to_upload = [{path:"spec/vcls/includes/service_id_injection_include.vcl"}]
+        include_to_upload = ["spec/vcls/includes/service_id_injection_include.vcl"]
         deploy_vcl @api_key, @service.id, "spec/vcls/service_id_injection.vcl", false, include_to_upload
         
         active_version = get_active_version

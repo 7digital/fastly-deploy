@@ -19,7 +19,7 @@ def deploy(argv)
     opts.on("-i", "--vcl-includes INCLUDES_DIR", "Includes Directory") do |includes_dir|
       options[:includes] = []
       Dir.entries(includes_dir).select{|file| File.extname(file) == ".vcl" }.each do |file|
-        options[:includes].push({path:File.join(includes_dir, file)})
+        options[:includes].push(File.join(includes_dir, file))
       end
       puts options[:includes]
     end
