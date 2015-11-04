@@ -1,5 +1,5 @@
-include "one_include_with_infinite_loop"
+include "one_include_with_infinite_loop";
 
 sub vcl_include_test{
-  set obj.status = 201
+  set obj.status = 201;
 }

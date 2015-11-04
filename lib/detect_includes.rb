@@ -15,7 +15,7 @@ def get_includes_for_vcl(vcl_path, includes_dir, includes_found)
 end
 
 def get_includes_directly_in_vcl(vcl_path, includes_dir) 
-  return File.readlines(vcl_path).select { |line| /^include "(.*)"$/.match(line) }
-            .map{ |line| /^include "(.*)"$/.match(line)[1] }
+  return File.readlines(vcl_path).select { |line| /^include "(.*)";$/.match(line) }
+            .map{ |line| /^include "(.*)";$/.match(line)[1] }
             .map{ |vcl_file_name| File.join(includes_dir, vcl_file_name + ".vcl")}
 end

@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require_relative '../lib/methods'
+require_relative '../lib/detect_includes'
 require 'optparse'
 
 def deploy(argv)
@@ -17,11 +18,7 @@ def deploy(argv)
       options[:vcl_path] = vcl_path
     end
     opts.on("-i", "--vcl-includes INCLUDES_DIR", "Includes Directory") do |includes_dir|
-      options[:includes] = []
-      Dir.entries(includes_dir).select{|file| File.extname(file) == ".vcl" }.each do |file|
-        options[:includes].push(File.join(includes_dir, file))
-      end
-      puts options[:includes]
+      options[:includes_dir] = includes_dir
     end
     options[:purge_all] = false
     opts.on("-p", "--purge-all", "Purge All") do |purge_all|
@@ -41,11 +38,14 @@ def deploy(argv)
     exit 1
   end
 
+  includes = get_includes options[:vcl_path], options[:includes_dir]
+  puts includes
+
   deploy_vcl options[:api_key],
              options[:service_id],
              options[:vcl_path],
              options[:purge_all],
-             options[:includes]
+             includes
   return options[:api_key]
 end
 

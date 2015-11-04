@@ -1,4 +1,4 @@
-include "has_include"
+include "has_include";
 
 sub vcl_recv {
 #FASTLY recv

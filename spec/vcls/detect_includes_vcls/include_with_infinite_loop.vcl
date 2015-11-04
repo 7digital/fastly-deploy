@@ -1,4 +1,4 @@
-include "one_include_with_infinite_loop"
+include "one_include_with_infinite_loop";
 
 sub vcl_recv {
 #FASTLY recv

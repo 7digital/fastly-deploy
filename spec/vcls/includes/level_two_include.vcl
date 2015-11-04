@@ -1,5 +1,5 @@
-include "level_three_include"
+include "level_three_include";
 
 sub vcl_include_test{
-  set obj.status = 201
+  set obj.status = 201;
 }

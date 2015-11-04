@@ -1,5 +1,5 @@
-include "test_include"
+include "test_include";
 
-sub vcl_include_test{
-  set obj.status = 201
+sub has_include_vcl_include_test{
+  set obj.status = 201;
 }

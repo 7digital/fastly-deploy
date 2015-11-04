@@ -1,5 +1,5 @@
-include "has_include"
-include "has_same_include"
+include "has_include";
+include "has_same_include";
 
 sub vcl_recv {
 #FASTLY recv

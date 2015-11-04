@@ -1,4 +1,4 @@
-include "new_test_include"
+include "new_test_include";
 
 sub vcl_recv {
 #FASTLY recv
