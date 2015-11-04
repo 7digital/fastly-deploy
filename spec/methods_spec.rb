@@ -6,22 +6,7 @@ require 'fastly'
 RSpec.describe "fastly-deploy" do
 
   before(:each) do
-    puts "Creating test service..."
-
-    @api_key = ENV["FASTLY_SANDBOX_API_KEY"]
-    @fastly = Fastly.new({api_key: @api_key})
-    random_suffix = ('a'..'z').to_a.shuffle[0,8].join
-    @service = @fastly.create_service(name: "DeployTestService-#{random_suffix}")
-    @version = @service.version
-    @fastly.create_domain(service_id: @service.id,
-                         version: @version.number,
-                         name: "deploytestservice-#{random_suffix}.com")
-    @fastly.create_backend(service_id: @service.id,
-                          version: @version.number,
-                          name: "DeployTestBackend",
-                          ipv4: "192.0.43.10",
-                          port: 80)
-    
+    create_test_service
   end
 
   context "main vcl exists in initial version" do
@@ -153,12 +138,7 @@ RSpec.describe "fastly-deploy" do
   end  
 
   after(:each) do
-    puts "Deleting test service..."
-    @service = @fastly.get_service(@service.id)
-    active_version = @service.versions.find{|ver| ver.active?}
-    active_version.deactivate!
-    @service.delete!
-    puts "Deleted."
+    delete_test_service
   end
 end
 
