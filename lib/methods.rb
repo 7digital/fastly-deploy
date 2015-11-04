@@ -115,7 +115,7 @@ def inject_deploy_verify_code(vcl, version_num)
 end
 
 def inject_service_id(vcl_contents, service_id)
-  vcl_contents.gsub(/#FASTLY_SERVICE_ID/, service_id) 
+  vcl_contents.gsub(/#7D_FASTLY_SERVICE_ID/, service_id) 
 end  
 
 def validate(version)

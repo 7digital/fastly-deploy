@@ -107,10 +107,10 @@ RSpec.describe "fastly-deploy" do
         
         active_version = get_active_version
         expect_vcl_to_contain active_version, "service_id_injection", /set obj.response = "#{@service.id}"/
-        expect_vcl_not_to_contain active_version, "service_id_injection", /#FASTLY_SERVICE_ID/
+        expect_vcl_not_to_contain active_version, "service_id_injection", /#7D_FASTLY_SERVICE_ID/
 
         expect_vcl_to_contain active_version, "service_id_injection_include", /set obj.response = "#{@service.id}"/
-        expect_vcl_not_to_contain active_version, "service_id_injection_include", /#FASTLY_SERVICE_ID/
+        expect_vcl_not_to_contain active_version, "service_id_injection_include", /#7D_FASTLY_SERVICE_ID/
       end
 
       it "injects deployment confirmation and waits for confirmation" do
