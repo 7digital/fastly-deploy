@@ -1,12 +1,12 @@
 sub vcl_recv {
 #FASTLY recv
-#DEPLOY recv
+#7D_DEPLOY recv
 	error 900;
 }
 
 sub vcl_error {
 #FASTLY error
-#DEPLOY error
+#7D_DEPLOY error
 	if(obj.status == 900) {
 		set obj.status = 400;
 		set obj.response = "BAD REQUEST";

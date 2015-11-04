@@ -26,16 +26,16 @@ The deployment process clones the current activated version, as opposed to the l
 
 ## Deployment Verification
 
-After the new service version has been activated, an optional check can be made against the service URL to ensure that the new VCL has actually taken effect. In order to facilitate this, the VCL file must have the following `#DEPLOY` directives present so that additional logic can be injected before the upload:
+After the new service version has been activated, an optional check can be made against the service URL to ensure that the new VCL has actually taken effect. In order to facilitate this, the VCL file must have the following `#7D_DEPLOY` directives present so that additional logic can be injected before the upload:
 
 ```
 sub vcl_recv {
-    #DEPLOY recv
+    #7D_DEPLOY recv
     ...
 }
 
 sub vcl_error {
-    #DEPLOY error
+    #7D_DEPLOY error
     ...
 }
 ```

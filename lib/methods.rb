@@ -110,8 +110,8 @@ def inject_deploy_verify_code(vcl, version_num)
   # --------- DEPLOY VERIFY CHECK END ---------
   END
 
-  vcl.gsub(/#DEPLOY recv/, deploy_recv_vcl)
-    .gsub(/#DEPLOY error/, deploy_error_vcl)
+  vcl.gsub(/#7D_DEPLOY recv/, deploy_recv_vcl)
+    .gsub(/#7D_DEPLOY error/, deploy_error_vcl)
 end
 
 def inject_service_id(vcl_contents, service_id)
