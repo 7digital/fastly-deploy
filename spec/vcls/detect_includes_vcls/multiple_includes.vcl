@@ -1,5 +1,5 @@
 include "new_test_include";
-include "not_uploaded_again_include";
+include "not_uploaded_again_include"
 
 sub vcl_recv {
 #FASTLY recv
