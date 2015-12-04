@@ -14,8 +14,9 @@ def get_includes_for_vcl(vcl_path, includes_dir, includes_found)
   end
 end
 
-def get_includes_directly_in_vcl(vcl_path, includes_dir) 
-  include_pattern = /^include "(.*)";?$/
+def get_includes_directly_in_vcl(vcl_path, includes_dir)
+  # Using '$' for line ending is os dependent and fails w/windows line endings on linux
+  include_pattern = /^include "(.*)";?[\r\n]+/
   return File.readlines(vcl_path).select { |line| include_pattern.match(line) }
             .map{ |line| include_pattern.match(line)[1] }
             .map{ |vcl_file_name| File.join(includes_dir, vcl_file_name + ".vcl")}

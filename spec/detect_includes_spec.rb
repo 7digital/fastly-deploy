@@ -2,7 +2,6 @@ require 'rspec'
 require_relative '../lib/detect_includes.rb'
 
 RSpec.describe "get_includes" do
-
   it "should return empty array if there are no includes" do
     expect(get_includes("spec/vcls/detect_includes_vcls/no_includes.vcl", "spec/vcls/includes")).to be_empty
   end
@@ -52,4 +51,10 @@ RSpec.describe "get_includes" do
     expect(includes).to include("spec/vcls/includes/one_include_with_infinite_loop.vcl")
     expect(includes).to include("spec/vcls/includes/two_include_with_infinite_loop.vcl")
   end
-end  
+
+  it 'handles windows line endings when running on linux' do
+    includes = get_includes('spec/vcls/detect_includes_vcls/windows_line_endings.vcl', 'spec/vcls/includes')
+    expect(includes.length).to eq(1)
+    expect(includes).to include("spec/vcls/includes/new_test_include.vcl")
+  end
+end
