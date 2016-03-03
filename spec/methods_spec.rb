@@ -15,7 +15,7 @@ RSpec.describe "fastly-deploy" do
       @version.activate!
 
       puts "Activated service. Running test."
-    end  
+    end
 
     context "deploying a new VCL version" do
       it "increments the version number exposed by /vcl_version" do
@@ -28,7 +28,7 @@ RSpec.describe "fastly-deploy" do
 
         expect(number_of_domains_for_version(@version)).to eq(1)
         expect(number_of_domains_for_version(non_active_version)).to eq(2)
-        
+
         deploy_vcl @api_key, @service.id, "spec/vcls/test_no_wait.vcl", false, nil
 
         new_active_version = get_active_version()
@@ -84,7 +84,7 @@ RSpec.describe "fastly-deploy" do
           expect(JSON.parse(fastlyError.message)["detail"]).to match(/Couldn't find/)
         end
 
-        
+
       end
 
       it 'uploads includes that have not been created before' do
@@ -98,13 +98,12 @@ RSpec.describe "fastly-deploy" do
       end
 
       it 'errors if main file is invalid' do
-        expect{deploy_vcl @api_key, @service.id, "spec/vcls/error_test.vcl", false, nil}.to raise_error(/Message from VCC-compiler/)
+        expect{deploy_vcl @api_key, @service.id, "spec/vcls/error_test.vcl", false, nil}.to raise_error(/Running VCC-compiler failed/)
       end
 
       it "injects the service id in the vcls" do
         include_to_upload = ["spec/vcls/includes/service_id_injection_include.vcl"]
         deploy_vcl @api_key, @service.id, "spec/vcls/service_id_injection.vcl", false, include_to_upload
-        
         active_version = get_active_version
         expect_vcl_to_contain active_version, "service_id_injection", /set obj.response = "#{@service.id}"/
         expect_vcl_not_to_contain active_version, "service_id_injection", /#7D_FASTLY_SERVICE_ID/
@@ -115,7 +114,6 @@ RSpec.describe "fastly-deploy" do
 
       it "injects deployment confirmation and waits for confirmation" do
         expect {deploy_vcl @api_key, @service.id, "spec/vcls/wait_for_deployment_confirmation.vcl", false, nil}.to output(/Waiting for changes to take effect/).to_stdout
-        
       end
     end
   end
