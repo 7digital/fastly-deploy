@@ -1,5 +1,5 @@
 # fastly-deploy
-A tool to assist in the deployment of updated VCL to Fastly. Provides additional verification that the new VCL has taken effects.
+A tool to assist in the deployment of updated VCL to Fastly. Provides additional verification that the new VCL has taken effect.
 
 ## Usage
 ```
