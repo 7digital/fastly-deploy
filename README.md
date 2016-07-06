@@ -47,3 +47,9 @@ If the directives are not present, the additional verification check is skipped.
 ## Testing
 
 Tests can be run against a Fastly account by populating the `FASTLY_SANDBOX_API_KEY` environment variable with a Fastly API key and running `rspec`. As part of the tests, services will be automatically created and deleted by the fixtures. Do not run the tests using an account shared with production services.
+
+## Gem
+
+This code is available via [rubygems](https://rubygems.org/gems/fastly-deploy):
+
+    gem install fastly-deploy
