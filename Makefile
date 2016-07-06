@@ -7,7 +7,7 @@ ifndef RUBY_GEM_API_KEY
 	@exit 1
 endif
 	docker run \
-		--volume=$(pwd):/src \
+		--volume=$(shell pwd):/src \
 		--workdir=/src \
 		--env VERSION \
 		ruby:2.1.7 \
