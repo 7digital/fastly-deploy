@@ -4,6 +4,7 @@ GEM
     colorize (0.7.7)
     diff-lcs (1.2.5)
     fastly (1.4.2)
+    rake (11.2.2)
     rspec (3.4.0)
       rspec-core (~> 3.4.0)
       rspec-expectations (~> 3.4.0)
@@ -24,7 +25,5 @@ PLATFORMS
 DEPENDENCIES
   colorize
   fastly
+  rake
   rspec
-
-BUNDLED WITH
-   1.10.5
