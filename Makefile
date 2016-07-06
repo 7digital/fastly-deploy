@@ -2,7 +2,7 @@ test:
 	rspec
 
 publish-gem:
-ifndef FASTLY_PROD_API_KEY
+ifndef RUBY_GEM_API_KEY
 	@echo Not to be run locally
 	@exit 1
 endif
