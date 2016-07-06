@@ -7,12 +7,13 @@ ifndef FASTLY_PROD_API_KEY
 	@exit 1
 endif
 	docker run \
-		--volume $(pwd):/app \
-		--workdir /app \
-		ruby:2.1.7-slim \
-		bash -c ' \
-		bundle install --gemfile=deploy/Gemfile && \
-		ruby deploy/bin/deploy.rb \
-			--api-key $(FASTLY_PROD_API_KEY) \
-			--service-id R1ALOuONOpB0QFk3ijfwe \
-			--vcl-path apollo-media-delivery.vcl'
+		--volume=$(pwd):/src \
+		--workdir=/src \
+		--env VERSION \
+		ruby:2.1.7 \
+		sh -c \
+			"echo --- > ~/.gem/credentials && \
+			echo :rubygems_api_key: $(RUBY_GEM_API_KEY) >> ~/.gem/credentials && \
+			chmod 0600 ~/.gem/credentials && \
+			gem build fastly-deploy.gemspec && \
+			gem push *.gem"
