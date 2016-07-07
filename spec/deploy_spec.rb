@@ -1,5 +1,6 @@
 require 'rspec'
 require_relative 'spec_helpers.rb'
+load (File.join File.dirname(__FILE__), '../bin/fastly-deploy')
 
 RSpec.describe "deploy" do
   before(:each) do
@@ -11,7 +12,9 @@ RSpec.describe "deploy" do
   end
 
   it 'should upload a main vcl and any includes' do
-    system "../bin/fastly-deploy -k #{@api_key} -s #{@service.id} -v spec/vcls/deploy_test.vcl -i spec/vcls/includes"
+    argv = ['-k', "#{@api_key}", '-s', "#{@service.id}", '-v', 'spec/vcls/deploy_test.vcl', '-i', 'spec/vcls/includes']
+
+    deploy argv
 
     active_version = get_active_version
     expect_vcl_to_contain active_version, "deploy_test", /900/
