@@ -1,9 +1,9 @@
 Gem::Specification.new do |s|
   s.name        = 'fastly-deploy'
-  s.version     = ENV['VERSION']
+  s.version     = ENV['VERSION'] || '0.0.0'
   s.date        = '2016-07-06'
   s.summary     = "Automated deploys for Fastly vcl configs"
-  s.description = "Automated deploys for Fastly vcl configs"
+  s.description = "Automated deploys for Fastly vcl configs. Also supports splitting up configs via include statements."
   s.authors     = ["7digital"]
   s.email       = 'developers@7digital.com'
   s.files       = ["lib/detect_includes.rb", "lib/methods.rb"]
