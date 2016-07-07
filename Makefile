@@ -17,3 +17,6 @@ endif
 			chmod 0600 ~/.gem/credentials && \
 			gem build fastly-deploy.gemspec && \
 			gem push *.gem"
+
+lint:
+	rubocop

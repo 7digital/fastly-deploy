@@ -21,7 +21,7 @@ def deploy(argv)
       options[:includes_dir] = includes_dir
     end
     options[:purge_all] = false
-    opts.on('-p', '--purge-all', 'Purge All') do |purge_all|
+    opts.on('-p', '--purge-all', 'Purge All') do
       options[:purge_all] = true
     end
     opts.on('-h', '--help', 'Display this screen') do
@@ -31,9 +31,7 @@ def deploy(argv)
   end
   optparse.parse! argv
 
-  if options[:api_key].nil? ||
-     options[:service_id].nil? ||
-     options[:vcl_path].nil? then
+  if options[:api_key].nil? || options[:service_id].nil? || options[:vcl_path].nil?
     puts optparse
     exit 1
   end
@@ -46,11 +44,10 @@ def deploy(argv)
              options[:vcl_path],
              options[:purge_all],
              includes
-  return options[:api_key]
+
+  options[:api_key]
 end
 
-# This is only run when run as a script. The FILE bit stops it 
+# This is only run when run as a script. The FILE bit stops it
 # from being run during the tests
-if __FILE__ == $0
-  deploy ARGV
-end
+deploy ARGV if __FILE__ == $PROGRAM_NAME
