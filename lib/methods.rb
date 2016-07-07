@@ -9,7 +9,7 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
   service = fastly.get_service(service_id)
 
   active_version = service.versions.find{|ver| ver.active?}
-  puts "Active Version: #{active_version.number}"
+  puts 'Active Version: #{active_version.number}'
   domain = fastly.list_domains(:service_id => service.id,
                                :version => active_version.number).first
   puts "Domain Name: #{domain.name}"
@@ -29,15 +29,15 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
     end
   end 
 
-  puts "Validating..."
+  puts 'Validating...'
   
   validate(new_version)
 
-  puts "Activating..."
+  puts 'Activating...'
   new_version.activate!
 
   if can_verify_deployment then
-    print "Waiting for changes to take effect."
+    print 'Waiting for changes to take effect.'
     attempts = 1
     deployed_vcl_version_number = 0
 
@@ -49,10 +49,10 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
         http.request(req)
       }
       deployed_vcl_version_number = res.body
-      print "."
+      print '.'
       attempts += 1
     end
-    puts "done."
+    puts 'done.'
 
     if deployed_vcl_version_number != new_version.number.to_s then
       STDERR.puts "Verify failed. /vcl_version returned [#{deployed_vcl_version_number}].".red
@@ -61,21 +61,21 @@ def deploy_vcl(api_key, service_id, vcl_path, purge_all, include_files)
   end
 
   if purge_all then
-    puts "Purging all..."
+    puts 'Purging all...'
     service.purge_all
   end
-  puts "Deployment complete.".green
+  puts 'Deployment complete.'.green
 end
 
 def upload_main_vcl(version, vcl_path, service_id)
-  vcl_name = File.basename(vcl_path, ".vcl")
+  vcl_name = File.basename(vcl_path, '.vcl')
   can_verify_deployment = upload_vcl version, vcl_path, vcl_name, service_id
   version.vcl(vcl_name).set_main!
   return can_verify_deployment
 end
 
 def upload_include_vcl(version, vcl_path, service_id)
-  vcl_name = File.basename(vcl_path, ".vcl")
+  vcl_name = File.basename(vcl_path, '.vcl')
   upload_vcl version, vcl_path, vcl_name, service_id
 end
 
@@ -121,9 +121,9 @@ end
 def validate(version)
   path = version.class.get_path(version.service_id, version.number)
   response = version.fetcher.client.get("#{path}/validate")
-  status = response["status"]
-  if status!= "ok"
-    raise response["msg"]
+  status = response['status']
+  if status!= 'ok'
+    raise response['msg']
   end
 end
 
