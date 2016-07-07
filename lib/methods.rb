@@ -93,7 +93,7 @@ end
 def inject_deploy_verify_code(vcl, version_num)
   deploy_recv_vcl = <<-END
   # --------- DEPLOY VERIFY CHECK START ---------
-  if (req.url == '/vcl_version') {
+  if (req.url == "/vcl_version") {
     error 902;
   }
   # --------- DEPLOY VERIFY CHECK END ---------
@@ -103,7 +103,7 @@ def inject_deploy_verify_code(vcl, version_num)
   # --------- DEPLOY VERIFY CHECK START ---------
   if (obj.status == 902) {
     set obj.status = 200;
-    set obj.response = 'OK';
+    set obj.response = "OK";
     synthetic "#{version_num}";
     return(deliver);
   }
