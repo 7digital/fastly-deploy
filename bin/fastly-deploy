@@ -7,7 +7,7 @@ require 'optparse'
 def deploy(argv)
   options = {}
   optparse = OptionParser.new do |opts|
-    opts.banner = "Usage: deploy.rb [options]"
+    opts.banner = "Usage: fastly-deploy [options]"
     opts.on("-k", "--api-key API_KEY", "Fastly API Key") do |api_key|
       options[:api_key] = api_key
     end

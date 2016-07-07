@@ -1,13 +1,21 @@
 # fastly-deploy
 A tool to assist in the deployment of updated VCL to Fastly. Provides additional verification that the new VCL has taken effect.
 
+## Installation
+
+This app is available via [rubygems](https://rubygems.org/gems/fastly-deploy):
+
+```
+gem install fastly-deploy
+```
+
 ## Usage
 ```
-deploy.rb [options]
+fastly-deploy [options]
     -k, --api-key API_KEY            Fastly API Key
     -s, --service-id SERVICE_ID      Service ID
     -v, --vcl-path FILE              VCL Path
-    -i, --vcl-includes INCLUDES_DIR  Includes Directory
+    -i, --vcl-includes INCLUDES_DIR  Includes Directory (optional)
     -p, --purge-all                  Purge All
     -h, --help                       Display this screen
 ```
@@ -17,12 +25,12 @@ deploy.rb [options]
 To deploy a new main VCL (foo.vcl) with includes contained in the 'includes' directory:
 
 ```
-ruby bin/deploy.rb -k d3cafb4dde4dbeef -s 123456789abcdef -v foo.vcl -i includes -p
+fastly-deploy --api-key d3cafb4dde4dbeef --service-id 123456789abcdef --vcl-path foo.vcl --vcl-includes includes --purge-all
 ```
 
 ## Versioning
 
-The deployment process clones the current activated version, as opposed to the latest/highest numbered version.
+The deployment process clones the current activated version in Fastly, as opposed to the latest/highest numbered version.
 
 ## Deployment Verification
 
@@ -46,10 +54,4 @@ If the directives are not present, the additional verification check is skipped.
 
 ## Testing
 
-Tests can be run against a Fastly account by populating the `FASTLY_SANDBOX_API_KEY` environment variable with a Fastly API key and running `rspec`. As part of the tests, services will be automatically created and deleted by the fixtures. Do not run the tests using an account shared with production services.
-
-## Gem
-
-This code is available via [rubygems](https://rubygems.org/gems/fastly-deploy):
-
-    gem install fastly-deploy
+Tests can be run against a Fastly account by populating the `FASTLY_SANDBOX_API_KEY` environment variable with a Fastly API key and running `rspec`. As part of the tests, services will be automatically created and deleted by the fixtures. **Do not run the tests using an account shared with production services.**

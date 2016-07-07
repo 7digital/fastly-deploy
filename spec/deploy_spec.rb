@@ -1,5 +1,5 @@
 require 'rspec'
-require_relative '../bin/deploy.rb'
+require_relative '../bin/fastly-deploy'
 require_relative 'spec_helpers.rb'
 
 RSpec.describe "deploy" do
@@ -11,7 +11,6 @@ RSpec.describe "deploy" do
     puts "Test service created"
   end
 
-
   it "should upload a main vcl and any includes" do
     argv = ["-k", "#{@api_key}", "-s", "#{@service.id}", "-v", "spec/vcls/deploy_test.vcl", "-i", "spec/vcls/includes"]
 
@@ -20,10 +19,10 @@ RSpec.describe "deploy" do
     active_version = get_active_version
     expect_vcl_to_contain active_version, "deploy_test", /900/
     expect_vcl_to_contain active_version, "new_test_include", /563/
-  end 
+  end
 
   after(:each) do
     delete_test_service
   end
 
-end  
+end
