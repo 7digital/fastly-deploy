@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'fastly-deploy'
   s.version     = ENV['VERSION'] || '0.0.0'
-  s.date        = '2016-07-06'
+  s.date        = Time.now.strftime('%Y-%m-%d')
   s.summary     = 'Automated deploys for Fastly vcl configs'
   s.description = 'Automated deploys for Fastly vcl configs. Also supports splitting up configs via include statements.'
   s.authors     = ['7digital']
