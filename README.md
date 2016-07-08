@@ -58,6 +58,4 @@ Tests can be run against a Fastly account by populating the `FASTLY_SANDBOX_API_
 
 ## Linting
 
-We've added rubocop linting which can be run with `make lint`
-
-There are currently still a number of unfixed failures.
+Rubocop linting can be run with `make lint`
