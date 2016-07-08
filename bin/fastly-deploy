@@ -50,4 +50,8 @@ end
 
 # This is only run when run as a script. The FILE bit stops it
 # from being run during the tests
-deploy ARGV if __FILE__ == $PROGRAM_NAME
+def filename(filepath)
+  URI(filepath).path.split('/').last
+end
+
+deploy ARGV if filename(__FILE__) == filename($PROGRAM_NAME)
